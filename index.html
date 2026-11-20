@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>노스포 — 스포일러 없는 스포츠</title>
 
-<!-- Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700;800;900&family=Inter:wght@500;700;800;900&display=swap">
@@ -523,17 +520,21 @@ function fmtDate(d) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Supabase 초기화
+// Supabase SDK 동적 로드
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function loadSupabaseSDK() {
+  return new Promise((resolve) => {
+    if (window.supabase) { resolve(true); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.head.appendChild(s);
+  });
+}
+
 function initSupabase() {
-  const url = localStorage.getItem(LS_URL_KEY);
-  const key = localStorage.getItem(LS_KEY_KEY);
-  if (url && key) {
-    try {
-      supabase = window.supabase.createClient(url, key);
-      return true;
-    } catch(e) { supabase = null; }
-  }
+  // Supabase SDK 없이도 앱은 정상 동작 — 연결은 사용자가 직접 설정
   return false;
 }
 
@@ -816,6 +817,8 @@ $('cfgSave').addEventListener('click', async () => {
 
   $('cfgSave').textContent = '연결 중…';
   try {
+    const loaded = await loadSupabaseSDK();
+    if (!loaded) throw new Error('Supabase SDK 로드 실패');
     const sb = window.supabase.createClient(url, key);
     const { error } = await sb.from('matches').select('id').limit(1);
     if (error) throw error;
