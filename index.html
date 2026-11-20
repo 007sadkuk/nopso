@@ -478,6 +478,7 @@ body {
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 설정
@@ -520,21 +521,13 @@ function fmtDate(d) {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Supabase SDK 동적 로드
+// Supabase SDK (body 하단에 로드됨)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 function loadSupabaseSDK() {
-  return new Promise((resolve) => {
-    if (window.supabase) { resolve(true); return; }
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
-    s.onload = () => resolve(true);
-    s.onerror = () => resolve(false);
-    document.head.appendChild(s);
-  });
+  return Promise.resolve(typeof window.supabase !== 'undefined');
 }
 
 function initSupabase() {
-  // Supabase SDK 없이도 앱은 정상 동작 — 연결은 사용자가 직접 설정
   return false;
 }
 
